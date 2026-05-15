@@ -120,18 +120,20 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
   const isLauncher = cfg.type === "launcher" && !data.overrideMode;
   const hasStream  = !!data.src;
 
-  const load = () => {
-    const val = input.trim();
+  const load = (overrideVal) => {
+    const val = (overrideVal !== undefined ? overrideVal : input).trim();
     if (!val) return;
 
-    if (cfg.type === "youtube") {
+   if (cfg.type === "youtube") {
       const id = extractYouTubeId(val);
       if (id) { setError(false); setInput(""); onUpdate(panelId, { type: "youtube", src: buildYTEmbed(id, true), videoId: id, muted: true }); }
+      else if (val.startsWith("http")) { setError(false); setInput(""); onUpdate(panelId, { type: "iframe", src: val, muted: false }); }
       else setError(true);
     }
     else if (cfg.type === "kick") {
       const ch = extractKickChannel(val);
       if (ch) { setError(false); setInput(""); onUpdate(panelId, { type: "kick", src: buildKickEmbed(ch, true), channel: ch, muted: true }); }
+      else if (val.startsWith("http")) { setError(false); setInput(""); onUpdate(panelId, { type: "iframe", src: val, muted: false }); }
       else setError(true);
     }
     else if (cfg.type === "direct" || cfg.type === "launcher") {
@@ -201,6 +203,7 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
             value={input}
             onChange={e => { setInput(e.target.value); setError(false); }}
             onKeyDown={e => e.key === "Enter" && load()}
+onPaste={e => { const v = e.clipboardData.getData("text"); setTimeout(() => load(v.trim()), 50); }}
             placeholder={hasStream ? "— active —" : cfg.hint}
             style={{
               flex: 1, background: "transparent", border: "none", outline: "none",

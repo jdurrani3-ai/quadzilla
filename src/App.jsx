@@ -78,12 +78,12 @@ const PANEL_CFG = [
 ];
 
 const APPS = [
-  { name: "NETFLIX",    url: "https://www.netflix.com",            color: "#E50914" },
-  { name: "PRIME",      url: "https://www.amazon.com/prime-video", color: "#00A8E0" },
-  { name: "HULU",       url: "https://www.hulu.com",               color: "#1CE783" },
-  { name: "PARAM+",     url: "https://www.paramountplus.com",      color: "#0064FF" },
-  { name: "PEACOCK",    url: "https://www.peacocktv.com",          color: "#FA4616" },
-  { name: "SLING FREE", url: "https://watch.sling.com",            color: "#FF7A00" },
+  { name: "NETFLIX",    url: "nflx://",     fallback: "https://www.netflix.com",            color: "#E50914" },
+  { name: "PRIME",      url: "aiv://",      fallback: "https://www.amazon.com/prime-video", color: "#00A8E0" },
+  { name: "HULU",       url: "hulu://",     fallback: "https://www.hulu.com",               color: "#1CE783" },
+  { name: "PARAM+",     url: "pplus://",    fallback: "https://www.paramountplus.com",      color: "#0064FF" },
+  { name: "PEACOCK",    url: "peacock://",  fallback: "https://www.peacocktv.com",          color: "#FA4616" },
+  { name: "SLING FREE", url: "slingtv://",  fallback: "https://watch.sling.com",            color: "#FF7A00" },
 ];
 
 const LAYOUTS = {
@@ -310,7 +310,7 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
               gap: "4px",
             }}>
               {APPS.map(app => (
-                <a key={app.name} href={app.url} target="_blank" rel="noopener noreferrer"
+                <a key={app.name} href={app.url}
                   style={{
                     display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center",

@@ -47,11 +47,15 @@ function openApp(customUrl, webFallback) {
   let appOpened = false;
   const onBlur = () => { appOpened = true; };
   window.addEventListener("blur", onBlur, { once: true });
-  window.location.href = customUrl;
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "display:none;width:0;height:0;border:0;";
+  document.body.appendChild(iframe);
+  iframe.src = customUrl;
   setTimeout(() => {
+    try { document.body.removeChild(iframe); } catch {}
     window.removeEventListener("blur", onBlur);
     if (!appOpened) window.open(webFallback, "_blank");
-  }, 1200);
+  }, 1000);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -66,28 +70,18 @@ const LinkIcon  = () => <svg width="9" height="9" viewBox="0 0 24 24" fill="curr
 /* ═══════════════════════════════════════════════════
    DATA
 ═══════════════════════════════════════════════════ */
+const SHARED_PRESETS = [
+  { label:"YouTube",  url:"https://www.youtube.com" },
+  { label:"Kick.com", url:"https://kick.com" },
+  { label:"Pluto TV", url:"https://pluto.tv" },
+  { label:"ABC News", url:"https://abcnews.go.com/live" },
+  { label:"CBS News", url:"https://cbsnews.com/live" },
+];
+
 const PANEL_CFG = [
-  { id:1, type:"youtube",  color:"#FF4444", hint:"paste url · enter",
-    presets:[
-      { label:"YouTube",     url:"https://www.youtube.com" },
-      { label:"CNN Live",    url:"https://www.youtube.com/@CNN/live" },
-      { label:"ESPN Live",   url:"https://www.youtube.com/@espn/live" },
-      { label:"Bloomberg",   url:"https://www.youtube.com/@BloombergTV/live" },
-    ]},
-  { id:2, type:"kick",     color:"#53FC18", hint:"paste url · enter",
-    presets:[
-      { label:"Kick.com",    url:"https://kick.com" },
-      { label:"Gaming",      url:"https://kick.com/categories/gaming" },
-      { label:"IRL",         url:"https://kick.com/categories/irl" },
-    ]},
-  { id:3, type:"direct",   color:"#4DFFB4", hint:"paste url · enter",
-    presets:[
-      { label:"Pluto TV",    url:"https://pluto.tv" },
-      { label:"ABC News",    url:"https://abcnews.go.com/live" },
-      { label:"NASA TV",     url:"https://www.nasa.gov/nasatv" },
-      { label:"Al Jazeera",  url:"https://www.aljazeera.com/live" },
-      { label:"NBC News",    url:"https://www.nbcnews.com/now" },
-    ]},
+  { id:1, type:"youtube",  color:"#FF4444", hint:"paste url · enter", presets:SHARED_PRESETS },
+  { id:2, type:"kick",     color:"#53FC18", hint:"paste url · enter", presets:SHARED_PRESETS },
+  { id:3, type:"direct",   color:"#4DFFB4", hint:"paste url · enter", presets:SHARED_PRESETS },
   { id:4, type:"launcher", color:"#E8FF00", hint:"or paste stream url · enter", presets:[] },
 ];
 

@@ -1,8 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 
-/* ═══════════════════════════════════════════════════
-   ICONS (base64 embedded — no external dependency)
-═══════════════════════════════════════════════════ */
 const ICONS = {
   netflix:   "data:image/png;base64,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",
   prime:     "data:image/png;base64,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",
@@ -12,20 +9,11 @@ const ICONS = {
   sling:     "data:image/png;base64,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",
 };
 
-/* ═══════════════════════════════════════════════════
-   UTILITIES
-═══════════════════════════════════════════════════ */
 function extractYouTubeId(input) {
   if (!input) return null;
   const t = input.trim();
   if (/^[a-zA-Z0-9_-]{11}$/.test(t)) return t;
-  const patterns = [
-    /[?&]v=([a-zA-Z0-9_-]{11})/,
-    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-    /\/embed\/([a-zA-Z0-9_-]{11})/,
-    /\/live\/([a-zA-Z0-9_-]{11})/,
-    /\/shorts\/([a-zA-Z0-9_-]{11})/,
-  ];
+  const patterns = [/[?&]v=([a-zA-Z0-9_-]{11})/,/youtu\.be\/([a-zA-Z0-9_-]{11})/,/\/embed\/([a-zA-Z0-9_-]{11})/,/\/live\/([a-zA-Z0-9_-]{11})/,/\/shorts\/([a-zA-Z0-9_-]{11})/];
   for (const p of patterns) { const m = t.match(p); if (m) return m[1]; }
   return null;
 }
@@ -37,55 +25,29 @@ function extractKickChannel(input) {
   if (/^[a-zA-Z0-9_-]+$/.test(t) && !t.includes(".")) return t;
   return null;
 }
-function buildYTEmbed(id, muted) {
-  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=${muted?1:0}&controls=1&rel=0&modestbranding=1`;
-}
-function buildKickEmbed(channel, muted) {
-  return `https://player.kick.com/${channel}?autoplay=true&muted=${muted}`;
-}
-function openApp(customUrl, webFallback) {
-  let appOpened = false;
-  const onBlur = () => { appOpened = true; };
-  window.addEventListener("blur", onBlur, { once: true });
-  const iframe = document.createElement("iframe");
-  iframe.style.cssText = "display:none;width:0;height:0;border:0;";
-  document.body.appendChild(iframe);
-  iframe.src = customUrl;
-  setTimeout(() => {
-    try { document.body.removeChild(iframe); } catch {}
-    window.removeEventListener("blur", onBlur);
-    if (!appOpened) window.open(webFallback, "_blank");
-  }, 1000);
-}
+function buildYTEmbed(id, muted) { return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=${muted?1:0}&controls=1&rel=0&modestbranding=1`; }
+function buildKickEmbed(channel, muted) { return `https://player.kick.com/${channel}?autoplay=true&muted=${muted}`; }
 
-/* ═══════════════════════════════════════════════════
-   SVG ICONS
-═══════════════════════════════════════════════════ */
-const PlayIcon  = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
-const MuteIcon  = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>;
-const UnmuteIcon= () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>;
-const CloseIcon = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>;
-const LinkIcon  = () => <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>;
+const PlayIcon   = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
+const MuteIcon   = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>;
+const UnmuteIcon = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>;
+const CloseIcon  = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>;
 
-/* ═══════════════════════════════════════════════════
-   DATA
-═══════════════════════════════════════════════════ */
+/* ── Shared preset list for ALL panels ── */
 const SHARED_PRESETS = [
-  { label:"Kick.com",   url:"https://kick.com" },
-  { label:"Pluto TV",   url:"https://pluto.tv" },
-  { label:"ABC News",   url:"https://abcnews.go.com/live" },
-  { label:"Roku",       url:"https://therokuchannel.roku.com/" },
-  { label:"Xumo Play",  url:"https://play.xumo.com/discover" },
-  { label:"Plex",       url:"https://app.plex.tv/desktop/#!/" },
+  { label:"Kick.com",  url:"https://kick.com" },
+  { label:"Pluto TV",  url:"https://pluto.tv" },
+  { label:"Plex TV",   url:"https://app.plex.tv/desktop/#!/" },
 ];
 
 const PANEL_CFG = [
-  { id:1, type:"youtube",  color:"#FF4444", hint:"paste url · enter", presets:SHARED_PRESETS },
-  { id:2, type:"kick",     color:"#53FC18", hint:"paste url · enter", presets:SHARED_PRESETS },
-  { id:3, type:"direct",   color:"#4DFFB4", hint:"paste url · enter", presets:SHARED_PRESETS },
-  { id:4, type:"launcher", color:"#E8FF00", hint:"or paste stream url · enter", presets:[] },
+  { id:1, type:"youtube", color:"#FF4444", hint:"paste url · enter", presets:SHARED_PRESETS },
+  { id:2, type:"kick",    color:"#53FC18", hint:"paste url · enter", presets:SHARED_PRESETS },
+  { id:3, type:"direct",  color:"#4DFFB4", hint:"paste url · enter", presets:SHARED_PRESETS },
+  { id:4, type:"direct",  color:"#E8FF00", hint:"paste url · enter", presets:SHARED_PRESETS },
 ];
 
+/* ── App Launcher tiles for Panel 4 (web links only) ── */
 const APPS = [
   { name:"NETFLIX",    url:"https://www.netflix.com",            icon:ICONS.netflix,   color:"#E50914" },
   { name:"PRIME",      url:"https://www.amazon.com/prime-video", icon:ICONS.prime,     color:"#00A8E0" },
@@ -96,23 +58,19 @@ const APPS = [
 ];
 
 const LAYOUTS = {
-  "2×2":   { grid:{ gridTemplateColumns:"1fr 1fr", gridTemplateRows:"1fr 1fr" }, visible:[1,2,3,4], style:()=>({}) },
-  "DUAL":  { grid:{ gridTemplateColumns:"1fr 1fr", gridTemplateRows:"1fr" },   visible:[1,2],     style:()=>({}) },
+  "2x2":   { grid:{ gridTemplateColumns:"1fr 1fr", gridTemplateRows:"1fr 1fr" }, visible:[1,2,3,4], style:()=>({}) },
+  "DUAL":  { grid:{ gridTemplateColumns:"1fr 1fr", gridTemplateRows:"1fr" },     visible:[1,2],     style:()=>({}) },
   "FOCUS": { grid:{ gridTemplateColumns:"2fr 1fr", gridTemplateRows:"1fr 1fr 1fr" }, visible:[1,2,3,4], style:(id)=>id===1?{gridRow:"1/4",gridColumn:"1"}:{} },
-  "CINEMA":{ grid:{ gridTemplateColumns:"1fr",     gridTemplateRows:"1fr" },   visible:[1],       style:()=>({}) },
+  "CINEMA":{ grid:{ gridTemplateColumns:"1fr",     gridTemplateRows:"1fr" },     visible:[1],       style:()=>({}) },
 };
 
-/* ═══════════════════════════════════════════════════
-   PANEL
-═══════════════════════════════════════════════════ */
-function Panel({ panelId, data, onUpdate, extraStyle }) {
-  const cfg = PANEL_CFG[panelId - 1];
-  const [input,   setInput]   = useState("");
-  const [error,   setError]   = useState(false);
-  const [hov,     setHov]     = useState(null);
-  const [dropdown,setDropdown]= useState(false);
-  const isLauncher = cfg.type === "launcher" && !data.overrideMode;
-  const hasStream  = !!data.src;
+function Panel({ panelId, data, onUpdate, extraStyle, isPortrait }) {
+  const cfg      = PANEL_CFG[panelId - 1];
+  const [input,    setInput]    = useState("");
+  const [error,    setError]    = useState(false);
+  const [hov,      setHov]      = useState(null);
+  const [dropdown, setDropdown] = useState(false);
+  const hasStream = !!data.src;
 
   useEffect(() => {
     if (!dropdown) return;
@@ -134,11 +92,11 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
       if (ch) { setError(false); setInput(""); onUpdate(panelId,{type:"kick",src:buildKickEmbed(ch,true),channel:ch,muted:true}); }
       else if (val.startsWith("http")) { setError(false); setInput(""); onUpdate(panelId,{type:"iframe",src:val,muted:false}); }
       else setError(true);
-    } else if (cfg.type === "direct" || cfg.type === "launcher") {
+    } else {
       if (val.startsWith("http")) {
         setError(false); setInput("");
         const isVid = /\.(mp4|webm|ogg)(\?.*)?$/i.test(val);
-        onUpdate(panelId,{type:isVid?"video":"iframe",src:val,muted:true,overrideMode:cfg.type==="launcher"});
+        onUpdate(panelId,{type:isVid?"video":"iframe",src:val,muted:true});
       } else setError(true);
     }
   };
@@ -153,69 +111,76 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
   };
   const clear = () => { setInput(""); onUpdate(panelId,{type:null,src:null,muted:true}); };
 
-  const btn = { width:"22px",height:"20px",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,transition:"all 0.12s" };
+  const toolbarH = isPortrait ? "26px" : "30px";
+  const btn = { height:"20px",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,transition:"all 0.12s" };
 
   return (
     <div style={{ display:"flex",flexDirection:"column",background:"#09090D",border:`1px solid ${hasStream?cfg.color+"28":"#111118"}`,overflow:"hidden",transition:"border-color 0.3s",position:"relative",...extraStyle }}>
       {/* Toolbar */}
-      <div style={{ display:"flex",alignItems:"center",gap:"5px",padding:"0 8px",height:"32px",background:"#06060A",borderBottom:`1px solid ${hasStream?cfg.color+"18":"#0E0E14"}`,flexShrink:0,position:"relative" }}>
-        <span style={{ fontFamily:"'Bebas Neue',cursive",fontSize:"14px",color:hasStream?cfg.color:"#1A1A22",letterSpacing:"1px",minWidth:"18px",lineHeight:1,transition:"color 0.3s" }}>
+      <div style={{ display:"flex",alignItems:"center",gap:"5px",padding:"0 7px",height:toolbarH,background:"#06060A",borderBottom:`1px solid ${hasStream?cfg.color+"18":"#0E0E14"}`,flexShrink:0,position:"relative" }}>
+
+        <span style={{ fontFamily:"'Bebas Neue',cursive",fontSize:"13px",color:hasStream?cfg.color:"#1A1A22",letterSpacing:"1px",minWidth:"18px",lineHeight:1,transition:"color 0.3s" }}>
           {String(panelId).padStart(2,"0")}
         </span>
 
-        {/* Dropdown trigger — only for panels 1-3 with presets */}
-        {cfg.presets && cfg.presets.length > 0 && (
-          <div style={{ position:"relative" }}>
-            <button onClick={(e)=>{ e.stopPropagation(); setDropdown(!dropdown); }}
-              style={{ ...btn,background:"transparent",border:`1px solid ${cfg.color}33`,color:cfg.color,fontSize:"10px",width:"18px",height:"18px" }}>
-              ▾
-            </button>
-            {dropdown && (
-              <div onClick={(e)=>e.stopPropagation()} style={{ position:"absolute",top:"22px",left:"0",zIndex:1000,background:"#0A0A10",border:`1px solid ${cfg.color}44`,minWidth:"160px",boxShadow:"0 4px 16px rgba(0,0,0,0.6)" }}>
-                {cfg.presets.map(p => (
-                  <div key={p.label} onClick={()=>{ load(p.url); setDropdown(false); }}
-                    style={{ padding:"6px 10px",fontFamily:"'IBM Plex Mono',monospace",fontSize:"10px",color:"#3A3A4E",cursor:"pointer",borderBottom:"1px solid #0E0E14",transition:"all 0.1s" }}
-                    onMouseEnter={e=>{e.currentTarget.style.background=cfg.color+"18";e.currentTarget.style.color=cfg.color;}}
-                    onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="#3A3A4E";}}>
-                    {p.label}
+        {/* Dropdown trigger */}
+        <div style={{ position:"relative" }}>
+          <button onClick={(e)=>{ e.stopPropagation(); setDropdown(!dropdown); }}
+            style={{ ...btn,width:"22px",height:"22px",background:"transparent",border:`1px solid ${cfg.color}44`,color:cfg.color,fontSize:"12px",borderRadius:"2px" }}>
+            ▾
+          </button>
+          {dropdown && (
+            <div onClick={(e)=>e.stopPropagation()}
+              style={{ position:"absolute",top:"26px",left:"0",zIndex:1000,background:"#0A0A10",border:`1px solid ${cfg.color}55`,minWidth:"140px",maxHeight:"180px",overflowY:"auto",boxShadow:"0 6px 20px rgba(0,0,0,0.7)" }}>
+              {cfg.presets.map(p=>(
+                <div key={p.label} onClick={()=>{ load(p.url); setDropdown(false); }}
+                  style={{ padding:"8px 12px",fontFamily:"'IBM Plex Mono',monospace",fontSize:"11px",color:"#3A3A4E",cursor:"pointer",borderBottom:"1px solid #0E0E14" }}
+                  onMouseEnter={e=>{ e.currentTarget.style.background=cfg.color+"22"; e.currentTarget.style.color=cfg.color; }}
+                  onMouseLeave={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#3A3A4E"; }}>
+                  {p.label}
+                </div>
+              ))}
+              {/* App tiles in Panel 4 dropdown */}
+              {panelId === 4 && (<>
+                <div style={{ padding:"6px 12px",fontFamily:"'IBM Plex Mono',monospace",fontSize:"8px",color:"#1A1A28",letterSpacing:"2px",background:"#08080C",borderBottom:"1px solid #0E0E14" }}>STREAMING APPS</div>
+                {APPS.map(app=>(
+                  <div key={app.name} onClick={()=>{ window.open(app.url,"_blank"); setDropdown(false); }}
+                    style={{ display:"flex",alignItems:"center",gap:"8px",padding:"7px 12px",fontFamily:"'IBM Plex Mono',monospace",fontSize:"11px",color:"#3A3A4E",cursor:"pointer",borderBottom:"1px solid #0E0E14" }}
+                    onMouseEnter={e=>{ e.currentTarget.style.background=app.color+"18"; e.currentTarget.style.color=app.color; }}
+                    onMouseLeave={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#3A3A4E"; }}>
+                    <img src={app.icon} alt={app.name} style={{width:"22px",height:"22px",borderRadius:"4px",objectFit:"contain",flexShrink:0}}/>
+                    {app.name}
                   </div>
                 ))}
-              </div>
-            )}
-          </div>
-        )}
+              </>)}
+            </div>
+          )}
+        </div>
 
-        {hasStream && (
-          <div style={{ width:"5px",height:"5px",borderRadius:"50%",background:cfg.color,boxShadow:`0 0 6px ${cfg.color}`,animation:"qzPulse 2s ease-in-out infinite",flexShrink:0 }} />
-        )}
+        {hasStream && <div style={{ width:"5px",height:"5px",borderRadius:"50%",background:cfg.color,boxShadow:`0 0 6px ${cfg.color}`,animation:"qzPulse 2s ease-in-out infinite",flexShrink:0 }}/>}
+        <div style={{ width:"1px",height:"12px",background:"#141418",flexShrink:0 }}/>
 
-        <div style={{ width:"1px",height:"12px",background:"#141418",flexShrink:0 }} />
-
-        {!isLauncher ? (
-          <input value={input} onChange={e=>{ setInput(e.target.value); setError(false); }}
-            onKeyDown={e=>e.key==="Enter"&&load()}
-            onPaste={e=>{ const v=e.clipboardData.getData("text"); setTimeout(()=>load(v.trim()),50); }}
-            placeholder={hasStream?"— active —":cfg.hint}
-            style={{ flex:1,background:"transparent",border:"none",outline:"none",color:error?"#FF4D6D":"#383848",fontFamily:"'IBM Plex Mono',monospace",fontSize:"9.5px",minWidth:0 }} />
-        ) : (
-          <span style={{ flex:1,fontFamily:"'IBM Plex Mono',monospace",fontSize:"9px",color:"#1A1A28" }}>{cfg.hint}</span>
-        )}
+        <input value={input} onChange={e=>{ setInput(e.target.value); setError(false); }}
+          onKeyDown={e=>e.key==="Enter"&&load()}
+          onPaste={e=>{ const v=e.clipboardData.getData("text"); setTimeout(()=>load(v.trim()),50); }}
+          placeholder={hasStream?"— active —":cfg.hint}
+          style={{ flex:1,background:"transparent",border:"none",outline:"none",color:error?"#FF4D6D":"#383848",fontFamily:"'IBM Plex Mono',monospace",fontSize:"9px",minWidth:0 }}/>
 
         {!hasStream && (
           <button onClick={()=>load()} onMouseEnter={()=>setHov("l")} onMouseLeave={()=>setHov(null)}
-            style={{ ...btn,background:hov==="l"?cfg.color:"transparent",border:`1px solid ${cfg.color}`,color:hov==="l"?"#06060A":cfg.color }}>
+            style={{ ...btn,width:"22px",background:hov==="l"?cfg.color:"transparent",border:`1px solid ${cfg.color}`,color:hov==="l"?"#06060A":cfg.color }}>
             <PlayIcon/>
           </button>
         )}
         {hasStream && (<>
           {(data.type==="youtube"||data.type==="kick"||data.type==="video") && (
             <button onClick={toggleMute} onMouseEnter={()=>setHov("m")} onMouseLeave={()=>setHov(null)}
-              style={{ ...btn,background:"transparent",border:"1px solid",borderColor:data.muted?"#1C1C28":"#4DFFB4",color:data.muted?"#2E2E3E":"#4DFFB4" }}>
+              style={{ ...btn,width:"22px",background:"transparent",border:"1px solid",borderColor:data.muted?"#1C1C28":"#4DFFB4",color:data.muted?"#2E2E3E":"#4DFFB4" }}>
               {data.muted?<MuteIcon/>:<UnmuteIcon/>}
             </button>
           )}
           <button onClick={clear} onMouseEnter={()=>setHov("c")} onMouseLeave={()=>setHov(null)}
-            style={{ ...btn,background:"transparent",border:"1px solid",borderColor:hov==="c"?"#FF4D6D":"#1C1C28",color:hov==="c"?"#FF4D6D":"#2E2E3E" }}>
+            style={{ ...btn,width:"22px",background:"transparent",border:"1px solid",borderColor:hov==="c"?"#FF4D6D":"#1C1C28",color:hov==="c"?"#FF4D6D":"#2E2E3E" }}>
             <CloseIcon/>
           </button>
         </>)}
@@ -228,30 +193,10 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
         {hasStream&&data.type==="video"&&<video key={`vid-${data.src}`} src={data.src} autoPlay controls muted={data.muted} style={{width:"100%",height:"100%",display:"block",background:"#000"}}/>}
         {hasStream&&data.type==="iframe"&&<iframe key={`url-${data.src}`} src={data.src} sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation" style={{width:"100%",height:"100%",border:"none",display:"block"}} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen/>}
 
-        {!hasStream&&cfg.type==="launcher"&&(
-          <div style={{width:"100%",height:"100%",display:"flex",flexDirection:"column",padding:"6px"}}>
-            <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#141420",letterSpacing:"2px",textAlign:"center",marginBottom:"5px",paddingBottom:"4px",borderBottom:"1px solid #0E0E14"}}>
-              TAP TO OPEN · OPENS APP OR BROWSER
-            </div>
-            <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gridTemplateRows:"1fr 1fr",gap:"4px"}}>
-              {APPS.map(app=>(
-                <div key={app.name} onClick={()=>window.open(app.url,"_blank")}
-                  style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"3px",padding:"6px",background:`${app.color}0A`,border:`1px solid ${app.color}22`,cursor:"pointer",transition:"all 0.15s",WebkitTapHighlightColor:"transparent",borderRadius:"2px"}}
-                  onMouseEnter={e=>{e.currentTarget.style.background=`${app.color}1A`;e.currentTarget.style.borderColor=`${app.color}44`;}}
-                  onMouseLeave={e=>{e.currentTarget.style.background=`${app.color}0A`;e.currentTarget.style.borderColor=`${app.color}22`;}}>
-                  <img src={app.icon} alt={app.name} style={{width:"28px",height:"28px",borderRadius:"6px",objectFit:"contain",flexShrink:0}}/>
-                  <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:"6.5px",color:`${app.color}CC`,letterSpacing:"0.3px",textAlign:"center",lineHeight:1.3}}>{app.name}</span>
-                  <LinkIcon/>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {!hasStream&&cfg.type!=="launcher"&&(
-          <div style={{width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"5px",background:"repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(255,255,255,0.006) 3px,rgba(255,255,255,0.006) 4px)"}}>
-            <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:"clamp(48px,9vw,80px)",color:"#0D0D14",lineHeight:1,userSelect:"none"}}>{String(panelId).padStart(2,"0")}</span>
-            <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:"8px",color:"#111118",letterSpacing:"5px",userSelect:"none"}}>NO SIGNAL</span>
+        {!hasStream && (
+          <div style={{ width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4px",background:"repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(255,255,255,0.006) 3px,rgba(255,255,255,0.006) 4px)" }}>
+            <span style={{ fontFamily:"'Bebas Neue',cursive",fontSize:"clamp(36px,8vw,72px)",color:"#0D0D14",lineHeight:1,userSelect:"none" }}>{String(panelId).padStart(2,"0")}</span>
+            <span style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#111118",letterSpacing:"4px",userSelect:"none" }}>NO SIGNAL</span>
           </div>
         )}
       </div>
@@ -259,37 +204,37 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════
-   APP
-═══════════════════════════════════════════════════ */
-const DEFAULT_PANELS = { 1:{type:null,src:null,muted:true}, 2:{type:null,src:null,muted:true}, 3:{type:null,src:null,muted:true}, 4:{type:null,src:null,muted:true} };
+const DEFAULT = { 1:{type:null,src:null,muted:true}, 2:{type:null,src:null,muted:true}, 3:{type:null,src:null,muted:true}, 4:{type:null,src:null,muted:true} };
 
 export default function App() {
   const [panels, setPanels] = useState(() => {
     try { const s=sessionStorage.getItem("qz-panels"); if(s) return JSON.parse(s); } catch {}
-    return DEFAULT_PANELS;
+    return DEFAULT;
   });
-  const [layout,      setLayout]      = useState("2×2");
+  const [layout,      setLayout]      = useState("2x2");
   const [layoutHover, setLayoutHover] = useState(null);
   const [isPortrait,  setIsPortrait]  = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   useEffect(() => {
     const link = document.createElement("link");
-    link.rel="stylesheet";
-    link.href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap";
+    link.rel="stylesheet"; link.href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap";
     document.head.appendChild(link);
     const style = document.createElement("style");
     style.id="qz-styles";
-    style.textContent=`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body,#root{height:100%;overflow:hidden;background:#06060A;}input::placeholder{color:#1A1A26!important;}a{-webkit-tap-highlight-color:transparent;}@keyframes qzPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}`;
+    style.textContent=`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body,#root{height:100%;overflow:hidden;background:#06060A;}input::placeholder{color:#1A1A26!important;}@keyframes qzPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}`;
     document.head.appendChild(style);
-    const check=()=>setIsPortrait(window.innerWidth<window.innerHeight&&window.innerWidth<768);
+    const check = () => {
+      const w=window.innerWidth, h=window.innerHeight;
+      setIsPortrait(w < h && w < 768);
+      setIsLandscape(w > h && h < 500);
+    };
     check();
     window.addEventListener("resize",check);
     window.addEventListener("orientationchange",check);
     return()=>{
       if(document.head.contains(link))document.head.removeChild(link);
-      const s=document.getElementById("qz-styles");
-      if(s)document.head.removeChild(s);
+      const s=document.getElementById("qz-styles");if(s)document.head.removeChild(s);
       window.removeEventListener("resize",check);
       window.removeEventListener("orientationchange",check);
     };
@@ -297,40 +242,55 @@ export default function App() {
 
   const updatePanel = useCallback((id, data) => {
     setPanels(prev => {
-      const next = {...prev,[id]:data};
-      try { sessionStorage.setItem("qz-panels", JSON.stringify(next)); } catch {}
+      const next={...prev,[id]:data};
+      try { sessionStorage.setItem("qz-panels",JSON.stringify(next)); } catch {}
       return next;
     });
-  }, []);
+  },[]);
 
   const cfg = LAYOUTS[layout];
   const liveCount = Object.values(panels).filter(p=>p.src).length;
-  const gridStyle = (isPortrait&&layout==="2×2") ? {gridTemplateColumns:"1fr",gridTemplateRows:"1fr 1fr 1fr 1fr"} : cfg.grid;
+
+  /* Responsive grid overrides */
+  const gridStyle = (() => {
+    if (isPortrait && layout==="2x2")
+      return { gridTemplateColumns:"1fr", gridTemplateRows:"1fr 1fr 1fr 1fr" };
+    if (isLandscape && layout==="2x2")
+      return { gridTemplateColumns:"1fr 1fr 1fr 1fr", gridTemplateRows:"1fr" };
+    return cfg.grid;
+  })();
+
+  const headerH = isPortrait ? "34px" : isLandscape ? "30px" : "38px";
 
   return (
-    <div style={{width:"100vw",height:"100vh",background:"#06060A",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Outfit',sans-serif"}}>
-      <div style={{height:"42px",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 10px",background:"#040407",borderBottom:"1px solid #0D0D14"}}>
-        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-          <div style={{width:"7px",height:"7px",borderRadius:"50%",background:"#E8FF00",boxShadow:"0 0 8px #E8FF00,0 0 18px rgba(232,255,0,0.2)",flexShrink:0}}/>
-          <span style={{fontFamily:"'Bebas Neue',cursive",fontSize:isPortrait?"18px":"22px",color:"#E8FF00",letterSpacing:"8px",lineHeight:1}}>QUADZILLA</span>
-          {!isPortrait&&<span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:"8px",color:"#131320",letterSpacing:"3px"}}>MULTI\u00b7STREAM</span>}
-          {liveCount>0&&<div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#4DFFB4",letterSpacing:"1px",background:"rgba(77,255,180,0.05)",border:"1px solid rgba(77,255,180,0.12)",padding:"2px 6px"}}>{liveCount}/4{!isPortrait?" ACTIVE":""}</div>}
+    <div style={{ width:"100vw",height:"100vh",background:"#06060A",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Outfit',sans-serif" }}>
+      {/* Header */}
+      <div style={{ height:headerH,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 10px",background:"#040407",borderBottom:"1px solid #0D0D14" }}>
+        <div style={{ display:"flex",alignItems:"center",gap:"7px" }}>
+          <div style={{ width:"6px",height:"6px",borderRadius:"50%",background:"#E8FF00",boxShadow:"0 0 8px #E8FF00",flexShrink:0 }}/>
+          <span style={{ fontFamily:"'Bebas Neue',cursive",fontSize:isPortrait?"16px":isLandscape?"14px":"20px",color:"#E8FF00",letterSpacing:"7px",lineHeight:1 }}>QUADZILLA</span>
+          {!isPortrait&&!isLandscape&&<span style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#131320",letterSpacing:"3px" }}>MULTI·STREAM</span>}
+          {liveCount>0&&<div style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#4DFFB4",background:"rgba(77,255,180,0.05)",border:"1px solid rgba(77,255,180,0.12)",padding:"1px 5px" }}>{liveCount}/4</div>}
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:"3px"}}>
-          {!isPortrait&&<span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:"8px",color:"#111120",letterSpacing:"3px",marginRight:"4px"}}>LAYOUT</span>}
+        <div style={{ display:"flex",alignItems:"center",gap:"3px" }}>
+          {!isPortrait&&!isLandscape&&<span style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#111120",letterSpacing:"2px",marginRight:"3px" }}>LAYOUT</span>}
           {Object.keys(LAYOUTS).map(l=>{
-            const active=layout===l,hov=layoutHover===l;
+            const active=layout===l, hov=layoutHover===l;
             return(
               <button key={l} onClick={()=>setLayout(l)} onMouseEnter={()=>setLayoutHover(l)} onMouseLeave={()=>setLayoutHover(null)}
-                style={{background:active?"#E8FF00":hov?"rgba(232,255,0,0.06)":"transparent",color:active?"#04040A":hov?"#E8FF00":"#1E1E2E",border:"1px solid",borderColor:active?"#E8FF00":hov?"rgba(232,255,0,0.25)":"#0E0E18",padding:isPortrait?"2px 6px":"3px 10px",fontFamily:"'IBM Plex Mono',monospace",fontSize:isPortrait?"8px":"9px",cursor:"pointer",letterSpacing:"0.5px",fontWeight:"500",transition:"all 0.15s",lineHeight:"1.6"}}>
+                style={{ background:active?"#E8FF00":hov?"rgba(232,255,0,0.06)":"transparent",color:active?"#04040A":hov?"#E8FF00":"#1E1E2E",border:"1px solid",borderColor:active?"#E8FF00":hov?"rgba(232,255,0,0.25)":"#0E0E18",padding:isLandscape?"1px 6px":"2px 8px",fontFamily:"'IBM Plex Mono',monospace",fontSize:isLandscape?"7px":"8px",cursor:"pointer",letterSpacing:"0.5px",fontWeight:"500",transition:"all 0.15s",lineHeight:"1.5" }}>
                 {l}
               </button>
             );
           })}
         </div>
       </div>
-      <div style={{flex:1,display:"grid",gap:"2px",padding:"2px",overflow:"hidden",...gridStyle}}>
-        {cfg.visible.map(id=><Panel key={id} panelId={id} data={panels[id]} onUpdate={updatePanel} extraStyle={cfg.style(id)}/>)}
+
+      {/* Grid */}
+      <div style={{ flex:1,display:"grid",gap:"2px",padding:"2px",overflow:"hidden",...gridStyle }}>
+        {cfg.visible.map(id=>(
+          <Panel key={id} panelId={id} data={panels[id]} onUpdate={updatePanel} extraStyle={cfg.style(id)} isPortrait={isPortrait}/>
+        ))}
       </div>
     </div>
   );

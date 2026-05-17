@@ -32,8 +32,8 @@ function extractKickChannel(raw) {
   if (/^[a-zA-Z0-9_-]+$/.test(t) && !t.includes('.')) return t;
   return null;
 }
-const ytEmbed   = (id, m) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=${m?1:0}&controls=1&rel=0&modestbranding=1`;
-const kickEmbed = (ch, m) => `https://player.kick.com/${ch}?autoplay=true&muted=${m}`;
+const ytEmbed   = (id, mu) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=${mu?1:0}&controls=1&rel=0&modestbranding=1`;
+const kickEmbed = (ch, mu) => `https://player.kick.com/${ch}?autoplay=true&muted=${mu}`;
 
 const PlayIcon   = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
 const MuteIcon   = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>;
@@ -59,14 +59,18 @@ const APPS = [
   { name:'PEACOCK',  url:'https://www.peacocktv.com',          icon:ICONS.peacock,   color:'#FA4616' },
   { name:'SLING TV', url:'https://watch.sling.com',            icon:ICONS.sling,     color:'#FF7A00' },
 ];
+
+/* Layouts — always minmax(0,1fr) so rows hard-cap at available height */
 const LAYOUTS = {
-  '2x2':  { grid:{ gridTemplateColumns:'1fr 1fr',   gridTemplateRows:'minmax(0,1fr) minmax(0,1fr)' },                          visible:[1,2,3,4], style:()=>({}) },
-  'DUAL': { grid:{ gridTemplateColumns:'1fr 1fr',   gridTemplateRows:'minmax(0,1fr)' },                                        visible:[1,2],     style:()=>({}) },
-  'FOCUS':{ grid:{ gridTemplateColumns:'2fr 1fr',   gridTemplateRows:'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)' },            visible:[1,2,3,4], style:(id)=>id===1?{gridRow:'1/4',gridColumn:'1'}:{} },
-  'CINEMA':{ grid:{ gridTemplateColumns:'1fr',      gridTemplateRows:'minmax(0,1fr)' },                                        visible:[1],       style:()=>({}) },
+  '2x2':  { cols:'1fr 1fr',   rows:'minmax(0,1fr) minmax(0,1fr)',                                     visible:[1,2,3,4], style:()=>({}) },
+  'DUAL': { cols:'1fr 1fr',   rows:'minmax(0,1fr)',                                                   visible:[1,2],     style:()=>({}) },
+  'FOCUS':{ cols:'2fr 1fr',   rows:'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)',                       visible:[1,2,3,4], style:(id)=>id===1?{gridRow:'1/4',gridColumn:'1'}:{} },
+  'CINEMA':{ cols:'1fr',      rows:'minmax(0,1fr)',                                                   visible:[1],       style:()=>({}) },
 };
 
-/* Portal dropdown — escapes panel overflow:hidden */
+/* ─────────────────────────────────────────────────
+   PORTAL DROPDOWN — renders on <body>, never clipped
+───────────────────────────────────────────────── */
 function Dropdown({ open, pos, color, presets, panelId, onPick, onClose }) {
   if (!open || !pos) return null;
   return createPortal(
@@ -112,7 +116,10 @@ function Dropdown({ open, pos, color, presets, panelId, onPick, onClose }) {
   );
 }
 
-function Panel({ panelId, data, onUpdate, extraStyle, isMobile }) {
+/* ─────────────────────────────────────────────────
+   PANEL
+───────────────────────────────────────────────── */
+function Panel({ panelId, data, onUpdate, extraStyle, btnSz, tbH, fSz }) {
   const cfg        = PANEL_CFG[panelId-1];
   const [input,    setInput]    = useState('');
   const [error,    setError]    = useState(false);
@@ -153,41 +160,37 @@ function Panel({ panelId, data, onUpdate, extraStyle, isMobile }) {
 
   const toggleMute = () => {
     if (!data.src) return;
-    const muted = !data.muted;
+    const mu = !data.muted;
     let src = data.src;
-    if (data.type==='youtube'&&data.videoId) src=ytEmbed(data.videoId,muted);
-    if (data.type==='kick'   &&data.channel) src=kickEmbed(data.channel,muted);
-    onUpdate(panelId,{...data,muted,src});
+    if (data.type==='youtube'&&data.videoId) src=ytEmbed(data.videoId,mu);
+    if (data.type==='kick'   &&data.channel) src=kickEmbed(data.channel,mu);
+    onUpdate(panelId,{...data,muted:mu,src});
   };
   const clear = () => { setInput(''); onUpdate(panelId,{type:null,src:null,muted:true}); };
 
-  const tbH   = isMobile ? '44px' : '32px';
-  const btnSz = isMobile ? '38px' : '24px';
-  const fSz   = isMobile ? '11px' : '9px';
-
-  const IBtn = ({ onClick, children, bStyle={} }) => (
+  const IBtn = ({ onClick, children, bs={} }) => (
     <div onClick={onClick}
       style={{ width:btnSz, height:btnSz, display:'flex', alignItems:'center',
                justifyContent:'center', cursor:'pointer', flexShrink:0,
                borderRadius:'3px', WebkitTapHighlightColor:'transparent',
-               userSelect:'none', transition:'all 0.12s', ...bStyle }}>
+               userSelect:'none', transition:'all 0.12s', ...bs }}>
       {children}
     </div>
   );
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', minHeight:0,
-                  overflow:'hidden', background:'#09090D',
+    <div style={{ display:'flex', flexDirection:'column',
+                  background:'#09090D', overflow:'hidden',
                   border:`1px solid ${hasStream?cfg.color+'30':'#111118'}`,
                   transition:'border-color 0.3s', position:'relative', ...extraStyle }}>
 
       {/* Toolbar */}
-      <div style={{ display:'flex', alignItems:'center', gap:isMobile?'7px':'5px',
-                    padding:isMobile?'0 10px':'0 7px', height:tbH, flexShrink:0,
+      <div style={{ display:'flex', alignItems:'center', gap:'6px',
+                    padding:'0 10px', height:tbH, flexShrink:0,
                     background:'#06060A',
                     borderBottom:`1px solid ${hasStream?cfg.color+'20':'#0E0E14'}` }}>
 
-        <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:isMobile?'15px':'13px',
+        <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:'14px',
                        color:hasStream?cfg.color:'#1A1A22', letterSpacing:'1px',
                        minWidth:'20px', lineHeight:1, transition:'color 0.3s', flexShrink:0 }}>
           {String(panelId).padStart(2,'0')}
@@ -195,8 +198,8 @@ function Panel({ panelId, data, onUpdate, extraStyle, isMobile }) {
 
         <div ref={btnRef} style={{ flexShrink:0 }}>
           <IBtn onClick={openDropdown}
-            bStyle={{ border:`1px solid ${cfg.color}55`, background:dropdown?cfg.color+'18':'transparent' }}>
-            <span style={{ fontSize:isMobile?'15px':'12px', color:cfg.color, lineHeight:1 }}>▾</span>
+            bs={{ border:`1px solid ${cfg.color}55`, background:dropdown?cfg.color+'18':'transparent' }}>
+            <span style={{ fontSize:'14px', color:cfg.color, lineHeight:1 }}>▾</span>
           </IBtn>
         </div>
 
@@ -216,39 +219,39 @@ function Panel({ panelId, data, onUpdate, extraStyle, isMobile }) {
                    fontFamily:"'IBM Plex Mono',monospace", fontSize:fSz, minWidth:0 }}/>
 
         {!hasStream && (
-          <IBtn onClick={()=>load()} bStyle={{ border:`1px solid ${cfg.color}`, color:cfg.color }}>
+          <IBtn onClick={()=>load()} bs={{ border:`1px solid ${cfg.color}`, color:cfg.color }}>
             <PlayIcon/>
           </IBtn>
         )}
         {hasStream && (<>
           {(data.type==='youtube'||data.type==='kick'||data.type==='video') && (
             <IBtn onClick={toggleMute}
-              bStyle={{ border:'1px solid', borderColor:data.muted?'#1C1C28':'#4DFFB4',
-                        color:data.muted?'#2E2E3E':'#4DFFB4' }}>
+              bs={{ border:'1px solid', borderColor:data.muted?'#1C1C28':'#4DFFB4',
+                    color:data.muted?'#2E2E3E':'#4DFFB4' }}>
               {data.muted?<MuteIcon/>:<UnmuteIcon/>}
             </IBtn>
           )}
-          <IBtn onClick={clear} bStyle={{ border:'1px solid #1C1C28', color:'#2E2E3E' }}>
+          <IBtn onClick={clear} bs={{ border:'1px solid #1C1C28', color:'#2E2E3E' }}>
             <CloseIcon/>
           </IBtn>
         </>)}
       </div>
 
-      {/* Content */}
-      <div style={{ flex:1, overflow:'hidden', position:'relative', minHeight:0 }}>
+      {/* Content — overflow:hidden contains iframes */}
+      <div style={{ flex:1, overflow:'hidden', position:'relative' }}>
         {hasStream&&data.type==='youtube'&&(
-          <iframe key={'yt-'+data.videoId+'-'+data.muted} src={data.src}
+          <iframe key={'yt'+data.videoId+data.muted} src={data.src}
             style={{width:'100%',height:'100%',border:'none',display:'block'}}
             allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowFullScreen/>)}
         {hasStream&&data.type==='kick'&&(
-          <iframe key={'kick-'+data.channel+'-'+data.muted} src={data.src}
+          <iframe key={'kick'+data.channel+data.muted} src={data.src}
             style={{width:'100%',height:'100%',border:'none',display:'block'}}
             allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen/>)}
         {hasStream&&data.type==='video'&&(
-          <video key={'vid-'+data.src} src={data.src} autoPlay controls muted={data.muted}
+          <video key={'v'+data.src} src={data.src} autoPlay controls muted={data.muted}
             style={{width:'100%',height:'100%',display:'block',background:'#000'}}/>)}
         {hasStream&&data.type==='iframe'&&(
-          <iframe key={'url-'+data.src} src={data.src}
+          <iframe key={'u'+data.src} src={data.src}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
             style={{width:'100%',height:'100%',border:'none',display:'block'}}
             allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen/>)}
@@ -256,7 +259,7 @@ function Panel({ panelId, data, onUpdate, extraStyle, isMobile }) {
           <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column',
                         alignItems:'center', justifyContent:'center', gap:'4px',
                         background:'repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(255,255,255,0.005) 3px,rgba(255,255,255,0.005) 4px)' }}>
-            <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:'clamp(28px,6vw,64px)',
+            <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:'clamp(24px,5vw,56px)',
                            color:'#0D0D14', lineHeight:1, userSelect:'none' }}>
               {String(panelId).padStart(2,'0')}
             </span>
@@ -275,54 +278,99 @@ function Panel({ panelId, data, onUpdate, extraStyle, isMobile }) {
   );
 }
 
+/* ─────────────────────────────────────────────────
+   APP ROOT
+   Uses window.innerHeight for all height math —
+   no CSS inheritance, no dvh ambiguity, no flex guesswork.
+───────────────────────────────────────────────── */
 const DEFAULT = {1:{type:null,src:null,muted:true},2:{type:null,src:null,muted:true},3:{type:null,src:null,muted:true},4:{type:null,src:null,muted:true}};
 
 export default function App() {
   const [panels,      setPanels]      = useState(()=>{ try{const s=sessionStorage.getItem('qz-panels');if(s)return JSON.parse(s);}catch{} return DEFAULT; });
   const [layout,      setLayout]      = useState('2x2');
   const [layoutHover, setLayoutHover] = useState(null);
-  const [isMobile,    setIsMobile]    = useState(false);
-  const [isPortrait,  setIsPortrait]  = useState(false);
-  const [isLandscape, setIsLandscape] = useState(false);
+
+  /* Single source of truth for viewport size */
+  const [vp, setVp] = useState({ w: window.innerWidth, h: window.innerHeight });
 
   useEffect(()=>{
+    /* Fonts */
     const link=document.createElement('link');
     link.rel='stylesheet';
     link.href='https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap';
     document.head.appendChild(link);
+
+    /* Reset CSS — nothing fancy, just prevent scroll */
     const style=document.createElement('style');
     style.id='qz-g';
-    style.textContent='*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body,#root{width:100%;height:100dvh;overflow:hidden;background:#06060A;}input::placeholder{color:#1A1A26!important;}@keyframes qzPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}';
+    style.textContent='*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{overflow:hidden;}input::placeholder{color:#1A1A26!important;}@keyframes qzPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}';
     document.head.appendChild(style);
-    const check=()=>{ const w=window.innerWidth,h=window.innerHeight,mob=w<768; setIsMobile(mob); setIsPortrait(mob&&w<h); setIsLandscape(mob&&w>h); };
-    check();
-    window.addEventListener('resize',check);
-    window.addEventListener('orientationchange',()=>setTimeout(check,150));
-    return()=>{ if(document.head.contains(link))document.head.removeChild(link); const s=document.getElementById('qz-g');if(s)document.head.removeChild(s); window.removeEventListener('resize',check); };
+
+    /* Track actual viewport — this is what we do all math from */
+    const update = () => setVp({ w: window.innerWidth, h: window.innerHeight });
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', ()=>setTimeout(update, 200));
+
+    return()=>{
+      if(document.head.contains(link))document.head.removeChild(link);
+      const s=document.getElementById('qz-g');if(s)document.head.removeChild(s);
+      window.removeEventListener('resize', update);
+    };
   },[]);
 
-  const updatePanel=useCallback((id,data)=>{ setPanels(prev=>{ const next={...prev,[id]:data}; try{sessionStorage.setItem('qz-panels',JSON.stringify(next));}catch{} return next; }); },[]);
+  const updatePanel=useCallback((id,data)=>{
+    setPanels(prev=>{ const next={...prev,[id]:data}; try{sessionStorage.setItem('qz-panels',JSON.stringify(next));}catch{} return next; });
+  },[]);
 
-  const cfg=LAYOUTS[layout];
-  const liveCount=Object.values(panels).filter(p=>p.src).length;
+  /* ── Derived layout values — all in real pixels ── */
+  const { w, h } = vp;
+  const isMobile   = w < 768;
+  const isPortrait = isMobile && w < h;
+  const isLandscape= isMobile && w > h;
 
-  const gridStyle=(()=>{
-    if(isPortrait&&layout==='2x2') return{gridTemplateColumns:'1fr',gridTemplateRows:'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)'};
-    if(isLandscape&&layout==='2x2') return{gridTemplateColumns:'1fr 1fr 1fr 1fr',gridTemplateRows:'minmax(0,1fr)'};
-    return cfg.grid;
-  })();
+  const HEADER_PX = isLandscape ? 28 : isPortrait ? 36 : 40;
+  const GAP_PX    = 2;
+  const PAD_PX    = 2;
+  /* Grid gets exactly the remaining pixels after the header */
+  const GRID_H    = h - HEADER_PX;
 
-  const headerH=isLandscape?'28px':isPortrait?'36px':'40px';
-  const logoFs =isLandscape?'14px':isPortrait?'17px':'22px';
-  const btnPad =isLandscape?'1px 5px':isPortrait?'2px 8px':'3px 10px';
-  const btnFs  =isLandscape?'7px':'9px';
+  /* Button / font sizes */
+  const BTN_SZ = isMobile ? '38px' : '24px';
+  const TB_H   = isMobile ? '44px' : '32px';
+  const F_SZ   = isMobile ? '11px' : '9px';
+
+  /* Grid column/row template */
+  const cfg = LAYOUTS[layout];
+  let cols = cfg.cols;
+  let rows = cfg.rows;
+  if (isPortrait && layout==='2x2') {
+    cols = '1fr';
+    rows = 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)';
+  }
+  if (isLandscape && layout==='2x2') {
+    cols = '1fr 1fr 1fr 1fr';
+    rows = 'minmax(0,1fr)';
+  }
+
+  const liveCount = Object.values(panels).filter(p=>p.src).length;
+
+  const logoFs  = isLandscape?'14px':isPortrait?'17px':'22px';
+  const btnPad  = isLandscape?'1px 5px':isPortrait?'2px 8px':'3px 10px';
+  const lBtnFs  = isLandscape?'7px':'9px';
 
   return(
-    <div style={{ width:'100vw', height:'100dvh', background:'#06060A',
-                  display:'flex', flexDirection:'column', overflow:'hidden', fontFamily:"'Outfit',sans-serif" }}>
-      <div style={{ height:headerH, flexShrink:0, display:'flex', alignItems:'center',
-                    justifyContent:'space-between', padding:'0 10px',
-                    background:'#040407', borderBottom:'1px solid #0D0D14' }}>
+    /* Outer shell: exact pixel height from JS — no CSS height tricks */
+    <div style={{ position:'fixed', top:0, left:0,
+                  width:`${w}px`, height:`${h}px`,
+                  background:'#06060A', overflow:'hidden',
+                  fontFamily:"'Outfit',sans-serif" }}>
+
+      {/* ── Header ── exact pixel height */}
+      <div style={{ position:'absolute', top:0, left:0, right:0,
+                    height:`${HEADER_PX}px`,
+                    display:'flex', alignItems:'center', justifyContent:'space-between',
+                    padding:'0 10px', background:'#040407', borderBottom:'1px solid #0D0D14' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
           <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#E8FF00', boxShadow:'0 0 8px #E8FF00', flexShrink:0 }}/>
           <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:logoFs, color:'#E8FF00', letterSpacing:'7px', lineHeight:1 }}>QUADZILLA</span>
@@ -332,13 +380,13 @@ export default function App() {
         <div style={{ display:'flex', alignItems:'center', gap:'3px' }}>
           {!isMobile&&<span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'7px', color:'#111120', letterSpacing:'2px', marginRight:'4px' }}>LAYOUT</span>}
           {Object.keys(LAYOUTS).map(l=>{
-            const active=layout===l,hov=layoutHover===l;
+            const active=layout===l, hov=layoutHover===l;
             return(<button key={l} onClick={()=>setLayout(l)}
               onMouseEnter={()=>setLayoutHover(l)} onMouseLeave={()=>setLayoutHover(null)}
               style={{ background:active?'#E8FF00':hov?'rgba(232,255,0,0.06)':'transparent',
                        color:active?'#04040A':hov?'#E8FF00':'#1E1E2E', border:'1px solid',
                        borderColor:active?'#E8FF00':hov?'rgba(232,255,0,0.25)':'#0E0E18',
-                       padding:btnPad, fontFamily:"'IBM Plex Mono',monospace", fontSize:btnFs,
+                       padding:btnPad, fontFamily:"'IBM Plex Mono',monospace", fontSize:lBtnFs,
                        cursor:'pointer', letterSpacing:'0.5px', fontWeight:'500',
                        transition:'all 0.15s', lineHeight:'1.6', WebkitTapHighlightColor:'transparent' }}>
               {l}
@@ -346,9 +394,19 @@ export default function App() {
           })}
         </div>
       </div>
-      <div style={{ flex:'1 1 0', minHeight:0, display:'grid', gap:'2px', padding:'2px', overflow:'hidden', ...gridStyle }}>
+
+      {/* ── Panel grid ── exact pixel height: h - HEADER_PX */}
+      <div style={{ position:'absolute', top:`${HEADER_PX}px`, left:0, right:0,
+                    height:`${GRID_H}px`,
+                    display:'grid',
+                    gridTemplateColumns: cols,
+                    gridTemplateRows:    rows,
+                    gap:`${GAP_PX}px`, padding:`${PAD_PX}px`,
+                    overflow:'hidden' }}>
         {cfg.visible.map(id=>(
-          <Panel key={id} panelId={id} data={panels[id]} onUpdate={updatePanel} extraStyle={cfg.style(id)} isMobile={isMobile}/>
+          <Panel key={id} panelId={id} data={panels[id]} onUpdate={updatePanel}
+                 extraStyle={cfg.style(id)}
+                 btnSz={BTN_SZ} tbH={TB_H} fSz={F_SZ}/>
         ))}
       </div>
     </div>

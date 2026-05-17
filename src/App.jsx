@@ -71,11 +71,12 @@ const LinkIcon  = () => <svg width="9" height="9" viewBox="0 0 24 24" fill="curr
    DATA
 ═══════════════════════════════════════════════════ */
 const SHARED_PRESETS = [
-  { label:"YouTube",  url:"https://www.youtube.com" },
-  { label:"Kick.com", url:"https://kick.com" },
-  { label:"Pluto TV", url:"https://pluto.tv" },
-  { label:"ABC News", url:"https://abcnews.go.com/live" },
-  { label:"CBS News", url:"https://cbsnews.com/live" },
+  { label:"Kick.com",   url:"https://kick.com" },
+  { label:"Pluto TV",   url:"https://pluto.tv" },
+  { label:"ABC News",   url:"https://abcnews.go.com/live" },
+  { label:"Roku",       url:"https://therokuchannel.roku.com/" },
+  { label:"Xumo Play",  url:"https://play.xumo.com/discover" },
+  { label:"Plex",       url:"https://app.plex.tv/desktop/#!/" },
 ];
 
 const PANEL_CFG = [
@@ -86,12 +87,12 @@ const PANEL_CFG = [
 ];
 
 const APPS = [
-  { name:"NETFLIX",    url:"nflx://",    fallback:"https://www.netflix.com",            icon:ICONS.netflix,   color:"#E50914" },
-  { name:"PRIME",      url:"aiv://",     fallback:"https://www.amazon.com/prime-video", icon:ICONS.prime,     color:"#00A8E0" },
-  { name:"HULU",       url:"hulu://",    fallback:"https://www.hulu.com",               icon:ICONS.hulu,      color:"#1CE783" },
-  { name:"PARAM+",     url:"pplus://",   fallback:"https://www.paramountplus.com",      icon:ICONS.paramount, color:"#0064FF" },
-  { name:"PEACOCK",    url:"peacock://", fallback:"https://www.peacocktv.com",          icon:ICONS.peacock,   color:"#FA4616" },
-  { name:"SLING FREE", url:"slingtv://", fallback:"https://watch.sling.com",            icon:ICONS.sling,     color:"#FF7A00" },
+  { name:"NETFLIX",    url:"https://www.netflix.com",            icon:ICONS.netflix,   color:"#E50914" },
+  { name:"PRIME",      url:"https://www.amazon.com/prime-video", icon:ICONS.prime,     color:"#00A8E0" },
+  { name:"HULU",       url:"https://www.hulu.com",               icon:ICONS.hulu,      color:"#1CE783" },
+  { name:"PARAM+",     url:"https://www.paramountplus.com",      icon:ICONS.paramount, color:"#0064FF" },
+  { name:"PEACOCK",    url:"https://www.peacocktv.com",          icon:ICONS.peacock,   color:"#FA4616" },
+  { name:"SLING FREE", url:"https://watch.sling.com",            icon:ICONS.sling,     color:"#FF7A00" },
 ];
 
 const LAYOUTS = {
@@ -234,7 +235,7 @@ function Panel({ panelId, data, onUpdate, extraStyle }) {
             </div>
             <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gridTemplateRows:"1fr 1fr",gap:"4px"}}>
               {APPS.map(app=>(
-                <div key={app.name} onClick={()=>openApp(app.url,app.fallback)}
+                <div key={app.name} onClick={()=>window.open(app.url,"_blank")}
                   style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"3px",padding:"6px",background:`${app.color}0A`,border:`1px solid ${app.color}22`,cursor:"pointer",transition:"all 0.15s",WebkitTapHighlightColor:"transparent",borderRadius:"2px"}}
                   onMouseEnter={e=>{e.currentTarget.style.background=`${app.color}1A`;e.currentTarget.style.borderColor=`${app.color}44`;}}
                   onMouseLeave={e=>{e.currentTarget.style.background=`${app.color}0A`;e.currentTarget.style.borderColor=`${app.color}22`;}}>

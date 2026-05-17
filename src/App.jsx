@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 const ICONS = {
   netflix:   "data:image/png;base64,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",
@@ -13,7 +13,13 @@ function extractYouTubeId(input) {
   if (!input) return null;
   const t = input.trim();
   if (/^[a-zA-Z0-9_-]{11}$/.test(t)) return t;
-  const patterns = [/[?&]v=([a-zA-Z0-9_-]{11})/,/youtu\.be\/([a-zA-Z0-9_-]{11})/,/\/embed\/([a-zA-Z0-9_-]{11})/,/\/live\/([a-zA-Z0-9_-]{11})/,/\/shorts\/([a-zA-Z0-9_-]{11})/];
+  const patterns = [
+    /[?&]v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /\/embed\/([a-zA-Z0-9_-]{11})/,
+    /\/live\/([a-zA-Z0-9_-]{11})/,
+    /\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ];
   for (const p of patterns) { const m = t.match(p); if (m) return m[1]; }
   return null;
 }
@@ -25,15 +31,18 @@ function extractKickChannel(input) {
   if (/^[a-zA-Z0-9_-]+$/.test(t) && !t.includes(".")) return t;
   return null;
 }
-function buildYTEmbed(id, muted) { return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=${muted?1:0}&controls=1&rel=0&modestbranding=1`; }
-function buildKickEmbed(channel, muted) { return `https://player.kick.com/${channel}?autoplay=true&muted=${muted}`; }
+function buildYTEmbed(id, muted) {
+  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=${muted?1:0}&controls=1&rel=0&modestbranding=1`;
+}
+function buildKickEmbed(channel, muted) {
+  return `https://player.kick.com/${channel}?autoplay=true&muted=${muted}`;
+}
 
-const PlayIcon   = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
-const MuteIcon   = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>;
-const UnmuteIcon = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>;
-const CloseIcon  = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>;
+const PlayIcon   = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
+const MuteIcon   = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>;
+const UnmuteIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>;
+const CloseIcon  = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>;
 
-/* ── Shared preset list for ALL panels ── */
 const SHARED_PRESETS = [
   { label:"Kick.com",  url:"https://kick.com" },
   { label:"Pluto TV",  url:"https://pluto.tv" },
@@ -41,20 +50,19 @@ const SHARED_PRESETS = [
 ];
 
 const PANEL_CFG = [
-  { id:1, type:"youtube", color:"#FF4444", hint:"paste url · enter", presets:SHARED_PRESETS },
-  { id:2, type:"kick",    color:"#53FC18", hint:"paste url · enter", presets:SHARED_PRESETS },
-  { id:3, type:"direct",  color:"#4DFFB4", hint:"paste url · enter", presets:SHARED_PRESETS },
-  { id:4, type:"direct",  color:"#E8FF00", hint:"paste url · enter", presets:SHARED_PRESETS },
+  { id:1, type:"youtube", color:"#FF4444", hint:"paste youtube url · enter", presets:SHARED_PRESETS },
+  { id:2, type:"kick",    color:"#53FC18", hint:"paste kick url · enter",    presets:SHARED_PRESETS },
+  { id:3, type:"direct",  color:"#4DFFB4", hint:"paste any url · enter",     presets:SHARED_PRESETS },
+  { id:4, type:"direct",  color:"#E8FF00", hint:"paste any url · enter",     presets:SHARED_PRESETS },
 ];
 
-/* ── App Launcher tiles for Panel 4 (web links only) ── */
 const APPS = [
   { name:"NETFLIX",    url:"https://www.netflix.com",            icon:ICONS.netflix,   color:"#E50914" },
   { name:"PRIME",      url:"https://www.amazon.com/prime-video", icon:ICONS.prime,     color:"#00A8E0" },
   { name:"HULU",       url:"https://www.hulu.com",               icon:ICONS.hulu,      color:"#1CE783" },
   { name:"PARAM+",     url:"https://www.paramountplus.com",      icon:ICONS.paramount, color:"#0064FF" },
   { name:"PEACOCK",    url:"https://www.peacocktv.com",          icon:ICONS.peacock,   color:"#FA4616" },
-  { name:"SLING FREE", url:"https://watch.sling.com",            icon:ICONS.sling,     color:"#FF7A00" },
+  { name:"SLING TV",   url:"https://watch.sling.com",            icon:ICONS.sling,     color:"#FF7A00" },
 ];
 
 const LAYOUTS = {
@@ -64,19 +72,30 @@ const LAYOUTS = {
   "CINEMA":{ grid:{ gridTemplateColumns:"1fr",     gridTemplateRows:"1fr" },     visible:[1],       style:()=>({}) },
 };
 
-function Panel({ panelId, data, onUpdate, extraStyle, isPortrait }) {
-  const cfg      = PANEL_CFG[panelId - 1];
+/* ─────────────────────────────────────────────────────
+   PANEL
+───────────────────────────────────────────────────── */
+function Panel({ panelId, data, onUpdate, extraStyle, isMobile }) {
+  const cfg        = PANEL_CFG[panelId - 1];
   const [input,    setInput]    = useState("");
   const [error,    setError]    = useState(false);
   const [hov,      setHov]      = useState(null);
   const [dropdown, setDropdown] = useState(false);
-  const hasStream = !!data.src;
+  const dropRef    = useRef(null);
+  const hasStream  = !!data.src;
 
+  // Close dropdown on outside tap
   useEffect(() => {
     if (!dropdown) return;
-    const close = () => setDropdown(false);
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
+    const close = (e) => {
+      if (dropRef.current && !dropRef.current.contains(e.target)) setDropdown(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("touchstart", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("touchstart", close);
+    };
   }, [dropdown]);
 
   const load = (overrideVal) => {
@@ -84,19 +103,27 @@ function Panel({ panelId, data, onUpdate, extraStyle, isPortrait }) {
     if (!val) return;
     if (cfg.type === "youtube") {
       const id = extractYouTubeId(val);
-      if (id) { setError(false); setInput(""); onUpdate(panelId,{type:"youtube",src:buildYTEmbed(id,true),videoId:id,muted:true}); }
-      else if (val.startsWith("http")) { setError(false); setInput(""); onUpdate(panelId,{type:"iframe",src:val,muted:false}); }
-      else setError(true);
+      if (id) {
+        setError(false); setInput("");
+        onUpdate(panelId, { type:"youtube", src:buildYTEmbed(id,true), videoId:id, muted:true });
+      } else if (val.startsWith("http")) {
+        setError(false); setInput("");
+        onUpdate(panelId, { type:"iframe", src:val, muted:false });
+      } else setError(true);
     } else if (cfg.type === "kick") {
       const ch = extractKickChannel(val);
-      if (ch) { setError(false); setInput(""); onUpdate(panelId,{type:"kick",src:buildKickEmbed(ch,true),channel:ch,muted:true}); }
-      else if (val.startsWith("http")) { setError(false); setInput(""); onUpdate(panelId,{type:"iframe",src:val,muted:false}); }
-      else setError(true);
+      if (ch) {
+        setError(false); setInput("");
+        onUpdate(panelId, { type:"kick", src:buildKickEmbed(ch,true), channel:ch, muted:true });
+      } else if (val.startsWith("http")) {
+        setError(false); setInput("");
+        onUpdate(panelId, { type:"iframe", src:val, muted:false });
+      } else setError(true);
     } else {
       if (val.startsWith("http")) {
         setError(false); setInput("");
         const isVid = /\.(mp4|webm|ogg)(\?.*)?$/i.test(val);
-        onUpdate(panelId,{type:isVid?"video":"iframe",src:val,muted:true});
+        onUpdate(panelId, { type:isVid?"video":"iframe", src:val, muted:true });
       } else setError(true);
     }
   };
@@ -105,50 +132,99 @@ function Panel({ panelId, data, onUpdate, extraStyle, isPortrait }) {
     if (!data.src) return;
     const muted = !data.muted;
     let src = data.src;
-    if (data.type==="youtube"&&data.videoId) src=buildYTEmbed(data.videoId,muted);
-    if (data.type==="kick"   &&data.channel)  src=buildKickEmbed(data.channel,muted);
-    onUpdate(panelId,{...data,muted,src});
+    if (data.type==="youtube" && data.videoId) src = buildYTEmbed(data.videoId, muted);
+    if (data.type==="kick"    && data.channel)  src = buildKickEmbed(data.channel, muted);
+    onUpdate(panelId, { ...data, muted, src });
   };
-  const clear = () => { setInput(""); onUpdate(panelId,{type:null,src:null,muted:true}); };
+  const clear = () => { setInput(""); onUpdate(panelId, { type:null, src:null, muted:true }); };
 
-  const toolbarH = isPortrait ? "26px" : "30px";
-  const btn = { height:"20px",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,transition:"all 0.12s" };
+  // Toolbar height: taller on mobile for tap targets
+  const tbH   = isMobile ? "42px" : "32px";
+  // Button size: bigger on mobile
+  const btnSz  = isMobile ? "36px" : "24px";
+  const dropSz = isMobile ? "36px" : "24px";
+  const fSize  = isMobile ? "10px" : "9px";
+
+  const iconBtn = (onClick, children, overrides={}) => (
+    <div onClick={onClick}
+      style={{ width:btnSz, height:btnSz, display:"flex", alignItems:"center", justifyContent:"center",
+               cursor:"pointer", flexShrink:0, transition:"all 0.12s", borderRadius:"3px",
+               WebkitTapHighlightColor:"transparent", userSelect:"none", ...overrides }}>
+      {children}
+    </div>
+  );
 
   return (
-    <div style={{ display:"flex",flexDirection:"column",background:"#09090D",border:`1px solid ${hasStream?cfg.color+"28":"#111118"}`,overflow:"hidden",transition:"border-color 0.3s",position:"relative",...extraStyle }}>
-      {/* Toolbar */}
-      <div style={{ display:"flex",alignItems:"center",gap:"5px",padding:"0 7px",height:toolbarH,background:"#06060A",borderBottom:`1px solid ${hasStream?cfg.color+"18":"#0E0E14"}`,flexShrink:0,position:"relative" }}>
+    /*
+      KEY FIX: NO overflow:hidden on the panel container.
+      overflow:hidden is only on the CONTENT body below.
+      This lets the dropdown escape panel bounds.
+    */
+    <div style={{ display:"flex", flexDirection:"column", background:"#09090D",
+                  border:`1px solid ${hasStream ? cfg.color+"28" : "#111118"}`,
+                  transition:"border-color 0.3s", position:"relative", ...extraStyle }}>
 
-        <span style={{ fontFamily:"'Bebas Neue',cursive",fontSize:"13px",color:hasStream?cfg.color:"#1A1A22",letterSpacing:"1px",minWidth:"18px",lineHeight:1,transition:"color 0.3s" }}>
+      {/* ── Toolbar ── */}
+      <div style={{ display:"flex", alignItems:"center", gap:isMobile?"6px":"5px",
+                    padding:isMobile?"0 10px":"0 7px", height:tbH,
+                    background:"#06060A",
+                    borderBottom:`1px solid ${hasStream ? cfg.color+"20" : "#0E0E14"}`,
+                    flexShrink:0, position:"relative", zIndex:200 }}>
+
+        {/* Panel number */}
+        <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:isMobile?"15px":"13px",
+                       color:hasStream ? cfg.color : "#1A1A22",
+                       letterSpacing:"1px", minWidth:"20px", lineHeight:1, transition:"color 0.3s" }}>
           {String(panelId).padStart(2,"0")}
         </span>
 
-        {/* Dropdown trigger */}
-        <div style={{ position:"relative" }}>
-          <button onClick={(e)=>{ e.stopPropagation(); setDropdown(!dropdown); }}
-            style={{ ...btn,width:"22px",height:"22px",background:"transparent",border:`1px solid ${cfg.color}44`,color:cfg.color,fontSize:"12px",borderRadius:"2px" }}>
-            ▾
-          </button>
+        {/* ── Dropdown ── */}
+        <div ref={dropRef} style={{ position:"relative", flexShrink:0 }}>
+          {iconBtn(
+            (e) => { e.stopPropagation(); setDropdown(d => !d); },
+            <span style={{ fontSize:isMobile?"14px":"11px", color:cfg.color, lineHeight:1 }}>▾</span>,
+            { border:`1px solid ${cfg.color}44`, background: dropdown ? cfg.color+"18" : "transparent" }
+          )}
+
           {dropdown && (
-            <div onClick={(e)=>e.stopPropagation()}
-              style={{ position:"absolute",top:"26px",left:"0",zIndex:1000,background:"#0A0A10",border:`1px solid ${cfg.color}55`,minWidth:"140px",maxHeight:"180px",overflowY:"auto",boxShadow:"0 6px 20px rgba(0,0,0,0.7)" }}>
-              {cfg.presets.map(p=>(
-                <div key={p.label} onClick={()=>{ load(p.url); setDropdown(false); }}
-                  style={{ padding:"8px 12px",fontFamily:"'IBM Plex Mono',monospace",fontSize:"11px",color:"#3A3A4E",cursor:"pointer",borderBottom:"1px solid #0E0E14" }}
-                  onMouseEnter={e=>{ e.currentTarget.style.background=cfg.color+"22"; e.currentTarget.style.color=cfg.color; }}
-                  onMouseLeave={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#3A3A4E"; }}>
+            /* Position: absolute relative to dropRef div, zIndex above all panels */
+            <div style={{ position:"absolute", top:`calc(${dropSz} + 4px)`, left:0, zIndex:9999,
+                          background:"#0C0C12", border:`1px solid ${cfg.color}55`,
+                          minWidth:"160px", maxHeight:"220px", overflowY:"auto",
+                          boxShadow:"0 8px 24px rgba(0,0,0,0.8)", borderRadius:"3px" }}>
+
+              {/* Presets */}
+              {cfg.presets.map(p => (
+                <div key={p.label}
+                  onClick={() => { load(p.url); setDropdown(false); }}
+                  style={{ padding:"10px 14px", fontFamily:"'IBM Plex Mono',monospace",
+                           fontSize:"12px", color:"#3A3A4E", cursor:"pointer",
+                           borderBottom:"1px solid #0E0E14",
+                           WebkitTapHighlightColor:"transparent" }}
+                  onMouseEnter={e => { e.currentTarget.style.background=cfg.color+"22"; e.currentTarget.style.color=cfg.color; }}
+                  onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#3A3A4E"; }}>
                   {p.label}
                 </div>
               ))}
-              {/* App tiles in Panel 4 dropdown */}
+
+              {/* Panel 4 gets streaming apps section */}
               {panelId === 4 && (<>
-                <div style={{ padding:"6px 12px",fontFamily:"'IBM Plex Mono',monospace",fontSize:"8px",color:"#1A1A28",letterSpacing:"2px",background:"#08080C",borderBottom:"1px solid #0E0E14" }}>STREAMING APPS</div>
-                {APPS.map(app=>(
-                  <div key={app.name} onClick={()=>{ window.open(app.url,"_blank"); setDropdown(false); }}
-                    style={{ display:"flex",alignItems:"center",gap:"8px",padding:"7px 12px",fontFamily:"'IBM Plex Mono',monospace",fontSize:"11px",color:"#3A3A4E",cursor:"pointer",borderBottom:"1px solid #0E0E14" }}
-                    onMouseEnter={e=>{ e.currentTarget.style.background=app.color+"18"; e.currentTarget.style.color=app.color; }}
-                    onMouseLeave={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#3A3A4E"; }}>
-                    <img src={app.icon} alt={app.name} style={{width:"22px",height:"22px",borderRadius:"4px",objectFit:"contain",flexShrink:0}}/>
+                <div style={{ padding:"6px 14px", fontFamily:"'IBM Plex Mono',monospace",
+                              fontSize:"8px", color:"#1A1A28", letterSpacing:"2px",
+                              background:"#08080C", borderBottom:"1px solid #0E0E14" }}>
+                  STREAMING APPS
+                </div>
+                {APPS.map(app => (
+                  <div key={app.name}
+                    onClick={() => { window.open(app.url,"_blank"); setDropdown(false); }}
+                    style={{ display:"flex", alignItems:"center", gap:"10px", padding:"9px 14px",
+                             fontFamily:"'IBM Plex Mono',monospace", fontSize:"12px",
+                             color:"#3A3A4E", cursor:"pointer", borderBottom:"1px solid #0E0E14",
+                             WebkitTapHighlightColor:"transparent" }}
+                    onMouseEnter={e => { e.currentTarget.style.background=app.color+"18"; e.currentTarget.style.color=app.color; }}
+                    onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#3A3A4E"; }}>
+                    <img src={app.icon} alt={app.name}
+                      style={{ width:"28px", height:"28px", borderRadius:"6px", objectFit:"contain", flexShrink:0 }}/>
                     {app.name}
                   </div>
                 ))}
@@ -157,46 +233,84 @@ function Panel({ panelId, data, onUpdate, extraStyle, isPortrait }) {
           )}
         </div>
 
-        {hasStream && <div style={{ width:"5px",height:"5px",borderRadius:"50%",background:cfg.color,boxShadow:`0 0 6px ${cfg.color}`,animation:"qzPulse 2s ease-in-out infinite",flexShrink:0 }}/>}
-        <div style={{ width:"1px",height:"12px",background:"#141418",flexShrink:0 }}/>
+        {/* Live dot */}
+        {hasStream && (
+          <div style={{ width:"5px", height:"5px", borderRadius:"50%", background:cfg.color,
+                        boxShadow:`0 0 6px ${cfg.color}`, animation:"qzPulse 2s ease-in-out infinite", flexShrink:0 }}/>
+        )}
 
-        <input value={input} onChange={e=>{ setInput(e.target.value); setError(false); }}
-          onKeyDown={e=>e.key==="Enter"&&load()}
-          onPaste={e=>{ const v=e.clipboardData.getData("text"); setTimeout(()=>load(v.trim()),50); }}
-          placeholder={hasStream?"— active —":cfg.hint}
-          style={{ flex:1,background:"transparent",border:"none",outline:"none",color:error?"#FF4D6D":"#383848",fontFamily:"'IBM Plex Mono',monospace",fontSize:"9px",minWidth:0 }}/>
+        <div style={{ width:"1px", height:"14px", background:"#141418", flexShrink:0 }}/>
 
-        {!hasStream && (
-          <button onClick={()=>load()} onMouseEnter={()=>setHov("l")} onMouseLeave={()=>setHov(null)}
-            style={{ ...btn,width:"22px",background:hov==="l"?cfg.color:"transparent",border:`1px solid ${cfg.color}`,color:hov==="l"?"#06060A":cfg.color }}>
-            <PlayIcon/>
-          </button>
+        {/* URL input */}
+        <input value={input}
+          onChange={e => { setInput(e.target.value); setError(false); }}
+          onKeyDown={e => e.key==="Enter" && load()}
+          onPaste={e => { const v=e.clipboardData.getData("text"); setTimeout(()=>load(v.trim()),50); }}
+          placeholder={hasStream ? "— active —" : cfg.hint}
+          style={{ flex:1, background:"transparent", border:"none", outline:"none",
+                   color:error ? "#FF4D6D" : "#383848",
+                   fontFamily:"'IBM Plex Mono',monospace", fontSize:fSize, minWidth:0 }}/>
+
+        {/* Action buttons */}
+        {!hasStream && iconBtn(
+          () => load(), <PlayIcon/>,
+          { border:`1px solid ${cfg.color}`, color:cfg.color,
+            background: hov==="l" ? cfg.color : "transparent" },
         )}
         {hasStream && (<>
-          {(data.type==="youtube"||data.type==="kick"||data.type==="video") && (
-            <button onClick={toggleMute} onMouseEnter={()=>setHov("m")} onMouseLeave={()=>setHov(null)}
-              style={{ ...btn,width:"22px",background:"transparent",border:"1px solid",borderColor:data.muted?"#1C1C28":"#4DFFB4",color:data.muted?"#2E2E3E":"#4DFFB4" }}>
-              {data.muted?<MuteIcon/>:<UnmuteIcon/>}
-            </button>
+          {(data.type==="youtube"||data.type==="kick"||data.type==="video") && iconBtn(
+            toggleMute,
+            data.muted ? <MuteIcon/> : <UnmuteIcon/>,
+            { border:"1px solid", borderColor:data.muted?"#1C1C28":"#4DFFB4",
+              color:data.muted?"#2E2E3E":"#4DFFB4" }
           )}
-          <button onClick={clear} onMouseEnter={()=>setHov("c")} onMouseLeave={()=>setHov(null)}
-            style={{ ...btn,width:"22px",background:"transparent",border:"1px solid",borderColor:hov==="c"?"#FF4D6D":"#1C1C28",color:hov==="c"?"#FF4D6D":"#2E2E3E" }}>
-            <CloseIcon/>
-          </button>
+          {iconBtn(
+            clear, <CloseIcon/>,
+            { border:`1px solid ${hov==="c"?"#FF4D6D":"#1C1C28"}`,
+              color: hov==="c" ? "#FF4D6D" : "#2E2E3E",
+              onMouseEnter:()=>setHov("c"), onMouseLeave:()=>setHov(null) }
+          )}
         </>)}
       </div>
 
-      {/* Body */}
-      <div style={{ flex:1,position:"relative",overflow:"hidden",minHeight:0 }}>
-        {hasStream&&data.type==="youtube"&&<iframe key={`yt-${data.videoId}-${data.muted}`} src={data.src} style={{width:"100%",height:"100%",border:"none",display:"block"}} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowFullScreen/>}
-        {hasStream&&data.type==="kick"&&<iframe key={`kick-${data.channel}-${data.muted}`} src={data.src} style={{width:"100%",height:"100%",border:"none",display:"block"}} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen/>}
-        {hasStream&&data.type==="video"&&<video key={`vid-${data.src}`} src={data.src} autoPlay controls muted={data.muted} style={{width:"100%",height:"100%",display:"block",background:"#000"}}/>}
-        {hasStream&&data.type==="iframe"&&<iframe key={`url-${data.src}`} src={data.src} sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation" style={{width:"100%",height:"100%",border:"none",display:"block"}} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen/>}
+      {/* ── Content body — ONLY this div has overflow:hidden ── */}
+      <div style={{ flex:1, overflow:"hidden", position:"relative", minHeight:0 }}>
+        {hasStream && data.type==="youtube" && (
+          <iframe key={`yt-${data.videoId}-${data.muted}`} src={data.src}
+            style={{ width:"100%", height:"100%", border:"none", display:"block" }}
+            allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share"
+            allowFullScreen/>
+        )}
+        {hasStream && data.type==="kick" && (
+          <iframe key={`kick-${data.channel}-${data.muted}`} src={data.src}
+            style={{ width:"100%", height:"100%", border:"none", display:"block" }}
+            allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+            allowFullScreen/>
+        )}
+        {hasStream && data.type==="video" && (
+          <video key={`vid-${data.src}`} src={data.src} autoPlay controls muted={data.muted}
+            style={{ width:"100%", height:"100%", display:"block", background:"#000" }}/>
+        )}
+        {hasStream && data.type==="iframe" && (
+          <iframe key={`url-${data.src}`} src={data.src}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+            style={{ width:"100%", height:"100%", border:"none", display:"block" }}
+            allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+            allowFullScreen/>
+        )}
 
         {!hasStream && (
-          <div style={{ width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4px",background:"repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(255,255,255,0.006) 3px,rgba(255,255,255,0.006) 4px)" }}>
-            <span style={{ fontFamily:"'Bebas Neue',cursive",fontSize:"clamp(36px,8vw,72px)",color:"#0D0D14",lineHeight:1,userSelect:"none" }}>{String(panelId).padStart(2,"0")}</span>
-            <span style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#111118",letterSpacing:"4px",userSelect:"none" }}>NO SIGNAL</span>
+          <div style={{ width:"100%", height:"100%", display:"flex", flexDirection:"column",
+                        alignItems:"center", justifyContent:"center", gap:"4px",
+                        background:"repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(255,255,255,0.005) 3px,rgba(255,255,255,0.005) 4px)" }}>
+            <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:"clamp(32px,7vw,68px)",
+                           color:"#0D0D14", lineHeight:1, userSelect:"none" }}>
+              {String(panelId).padStart(2,"0")}
+            </span>
+            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"7px",
+                           color:"#111118", letterSpacing:"4px", userSelect:"none" }}>
+              NO SIGNAL
+            </span>
           </div>
         )}
       </div>
@@ -204,81 +318,143 @@ function Panel({ panelId, data, onUpdate, extraStyle, isPortrait }) {
   );
 }
 
-const DEFAULT = { 1:{type:null,src:null,muted:true}, 2:{type:null,src:null,muted:true}, 3:{type:null,src:null,muted:true}, 4:{type:null,src:null,muted:true} };
+/* ─────────────────────────────────────────────────────
+   APP ROOT
+───────────────────────────────────────────────────── */
+const DEFAULT = {
+  1:{type:null,src:null,muted:true},
+  2:{type:null,src:null,muted:true},
+  3:{type:null,src:null,muted:true},
+  4:{type:null,src:null,muted:true},
+};
 
 export default function App() {
-  const [panels, setPanels] = useState(() => {
+  const [panels,      setPanels]      = useState(() => {
     try { const s=sessionStorage.getItem("qz-panels"); if(s) return JSON.parse(s); } catch {}
     return DEFAULT;
   });
   const [layout,      setLayout]      = useState("2x2");
   const [layoutHover, setLayoutHover] = useState(null);
+  const [isMobile,    setIsMobile]    = useState(false);
   const [isPortrait,  setIsPortrait]  = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
 
   useEffect(() => {
+    // ── Google Fonts ──
     const link = document.createElement("link");
-    link.rel="stylesheet"; link.href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap";
+    link.rel="stylesheet";
+    link.href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap";
     document.head.appendChild(link);
+
+    // ── Global styles ──
+    // Use 100dvh: iOS Safari dynamic viewport height (accounts for address bar)
     const style = document.createElement("style");
-    style.id="qz-styles";
-    style.textContent=`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body,#root{height:100%;overflow:hidden;background:#06060A;}input::placeholder{color:#1A1A26!important;}@keyframes qzPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}`;
+    style.id="qz-global";
+    style.textContent=`
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body, #root { width: 100%; height: 100dvh; overflow: hidden; background: #06060A; }
+      input::placeholder { color: #1A1A26 !important; }
+      @keyframes qzPulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    `;
     document.head.appendChild(style);
+
+    // ── Orientation / size detection ──
     const check = () => {
-      const w=window.innerWidth, h=window.innerHeight;
-      setIsPortrait(w < h && w < 768);
-      setIsLandscape(w > h && h < 500);
+      const w = window.innerWidth, h = window.innerHeight;
+      const mobile  = w < 768;
+      const portrait  = mobile && w < h;
+      const landscape = mobile && w > h;
+      setIsMobile(mobile);
+      setIsPortrait(portrait);
+      setIsLandscape(landscape);
     };
     check();
-    window.addEventListener("resize",check);
-    window.addEventListener("orientationchange",check);
-    return()=>{
-      if(document.head.contains(link))document.head.removeChild(link);
-      const s=document.getElementById("qz-styles");if(s)document.head.removeChild(s);
-      window.removeEventListener("resize",check);
-      window.removeEventListener("orientationchange",check);
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", () => setTimeout(check, 120));
+
+    return () => {
+      if (document.head.contains(link)) document.head.removeChild(link);
+      const s = document.getElementById("qz-global");
+      if (s) document.head.removeChild(s);
+      window.removeEventListener("resize", check);
     };
-  },[]);
+  }, []);
 
   const updatePanel = useCallback((id, data) => {
     setPanels(prev => {
-      const next={...prev,[id]:data};
-      try { sessionStorage.setItem("qz-panels",JSON.stringify(next)); } catch {}
+      const next = { ...prev, [id]: data };
+      try { sessionStorage.setItem("qz-panels", JSON.stringify(next)); } catch {}
       return next;
     });
-  },[]);
+  }, []);
 
-  const cfg = LAYOUTS[layout];
-  const liveCount = Object.values(panels).filter(p=>p.src).length;
+  const cfg       = LAYOUTS[layout];
+  const liveCount = Object.values(panels).filter(p => p.src).length;
 
-  /* Responsive grid overrides */
+  // Grid overrides for portrait / landscape
   const gridStyle = (() => {
-    if (isPortrait && layout==="2x2")
-      return { gridTemplateColumns:"1fr", gridTemplateRows:"1fr 1fr 1fr 1fr" };
-    if (isLandscape && layout==="2x2")
-      return { gridTemplateColumns:"1fr 1fr 1fr 1fr", gridTemplateRows:"1fr" };
+    if (isPortrait  && layout==="2x2") return { gridTemplateColumns:"1fr", gridTemplateRows:"1fr 1fr 1fr 1fr" };
+    if (isLandscape && layout==="2x2") return { gridTemplateColumns:"1fr 1fr 1fr 1fr", gridTemplateRows:"1fr" };
     return cfg.grid;
   })();
 
-  const headerH = isPortrait ? "34px" : isLandscape ? "30px" : "38px";
+  const headerH = isLandscape ? "28px" : isPortrait ? "36px" : "40px";
+  const logoSz  = isLandscape ? "14px" : isPortrait ? "18px" : "22px";
+  const btnPad  = isLandscape ? "1px 6px" : isPortrait ? "2px 9px" : "3px 10px";
+  const btnFs   = isLandscape ? "7px" : "9px";
 
   return (
-    <div style={{ width:"100vw",height:"100vh",background:"#06060A",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Outfit',sans-serif" }}>
-      {/* Header */}
-      <div style={{ height:headerH,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 10px",background:"#040407",borderBottom:"1px solid #0D0D14" }}>
-        <div style={{ display:"flex",alignItems:"center",gap:"7px" }}>
-          <div style={{ width:"6px",height:"6px",borderRadius:"50%",background:"#E8FF00",boxShadow:"0 0 8px #E8FF00",flexShrink:0 }}/>
-          <span style={{ fontFamily:"'Bebas Neue',cursive",fontSize:isPortrait?"16px":isLandscape?"14px":"20px",color:"#E8FF00",letterSpacing:"7px",lineHeight:1 }}>QUADZILLA</span>
-          {!isPortrait&&!isLandscape&&<span style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#131320",letterSpacing:"3px" }}>MULTI·STREAM</span>}
-          {liveCount>0&&<div style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#4DFFB4",background:"rgba(77,255,180,0.05)",border:"1px solid rgba(77,255,180,0.12)",padding:"1px 5px" }}>{liveCount}/4</div>}
+    <div style={{ width:"100vw", height:"100dvh", background:"#06060A",
+                  display:"flex", flexDirection:"column", overflow:"hidden",
+                  fontFamily:"'Outfit',sans-serif" }}>
+
+      {/* ── Header ── */}
+      <div style={{ height:headerH, flexShrink:0, display:"flex", alignItems:"center",
+                    justifyContent:"space-between", padding:"0 10px",
+                    background:"#040407", borderBottom:"1px solid #0D0D14" }}>
+
+        <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+          <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:"#E8FF00",
+                        boxShadow:"0 0 8px #E8FF00,0 0 18px rgba(232,255,0,0.15)", flexShrink:0 }}/>
+          <span style={{ fontFamily:"'Bebas Neue',cursive", fontSize:logoSz,
+                         color:"#E8FF00", letterSpacing:"7px", lineHeight:1 }}>
+            QUADZILLA
+          </span>
+          {!isMobile && (
+            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"7px",
+                           color:"#131320", letterSpacing:"3px" }}>
+              MULTI·STREAM
+            </span>
+          )}
+          {liveCount > 0 && (
+            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"7px",
+                          color:"#4DFFB4", background:"rgba(77,255,180,0.05)",
+                          border:"1px solid rgba(77,255,180,0.12)", padding:"1px 6px" }}>
+              {liveCount}/4 {!isMobile ? "ACTIVE" : ""}
+            </div>
+          )}
         </div>
-        <div style={{ display:"flex",alignItems:"center",gap:"3px" }}>
-          {!isPortrait&&!isLandscape&&<span style={{ fontFamily:"'IBM Plex Mono',monospace",fontSize:"7px",color:"#111120",letterSpacing:"2px",marginRight:"3px" }}>LAYOUT</span>}
-          {Object.keys(LAYOUTS).map(l=>{
-            const active=layout===l, hov=layoutHover===l;
-            return(
-              <button key={l} onClick={()=>setLayout(l)} onMouseEnter={()=>setLayoutHover(l)} onMouseLeave={()=>setLayoutHover(null)}
-                style={{ background:active?"#E8FF00":hov?"rgba(232,255,0,0.06)":"transparent",color:active?"#04040A":hov?"#E8FF00":"#1E1E2E",border:"1px solid",borderColor:active?"#E8FF00":hov?"rgba(232,255,0,0.25)":"#0E0E18",padding:isLandscape?"1px 6px":"2px 8px",fontFamily:"'IBM Plex Mono',monospace",fontSize:isLandscape?"7px":"8px",cursor:"pointer",letterSpacing:"0.5px",fontWeight:"500",transition:"all 0.15s",lineHeight:"1.5" }}>
+
+        <div style={{ display:"flex", alignItems:"center", gap:"3px" }}>
+          {!isMobile && (
+            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"7px",
+                           color:"#111120", letterSpacing:"2px", marginRight:"4px" }}>
+              LAYOUT
+            </span>
+          )}
+          {Object.keys(LAYOUTS).map(l => {
+            const active = layout===l, hov = layoutHover===l;
+            return (
+              <button key={l} onClick={()=>setLayout(l)}
+                onMouseEnter={()=>setLayoutHover(l)} onMouseLeave={()=>setLayoutHover(null)}
+                style={{ background:active?"#E8FF00":hov?"rgba(232,255,0,0.06)":"transparent",
+                         color:active?"#04040A":hov?"#E8FF00":"#1E1E2E",
+                         border:"1px solid",
+                         borderColor:active?"#E8FF00":hov?"rgba(232,255,0,0.25)":"#0E0E18",
+                         padding:btnPad, fontFamily:"'IBM Plex Mono',monospace",
+                         fontSize:btnFs, cursor:"pointer", letterSpacing:"0.5px",
+                         fontWeight:"500", transition:"all 0.15s", lineHeight:"1.6",
+                         WebkitTapHighlightColor:"transparent" }}>
                 {l}
               </button>
             );
@@ -286,10 +462,11 @@ export default function App() {
         </div>
       </div>
 
-      {/* Grid */}
-      <div style={{ flex:1,display:"grid",gap:"2px",padding:"2px",overflow:"hidden",...gridStyle }}>
-        {cfg.visible.map(id=>(
-          <Panel key={id} panelId={id} data={panels[id]} onUpdate={updatePanel} extraStyle={cfg.style(id)} isPortrait={isPortrait}/>
+      {/* ── Panel grid ── */}
+      <div style={{ flex:1, display:"grid", gap:"2px", padding:"2px", overflow:"hidden", ...gridStyle }}>
+        {cfg.visible.map(id => (
+          <Panel key={id} panelId={id} data={panels[id]} onUpdate={updatePanel}
+                 extraStyle={cfg.style(id)} isMobile={isMobile}/>
         ))}
       </div>
     </div>
